@@ -1,7 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Net.Sockets;
 using System.Threading.Tasks;
-using System.Threading;
 using CPULogServer.Models;
 
 namespace CPULogServer.Services.ServerService
@@ -9,8 +8,10 @@ namespace CPULogServer.Services.ServerService
     public interface IServerService
     {
         Task StartServer();
-        Task HandleClientCommunication(TcpClient client);
-
+        Task<string> SendRequest(TcpClient client, string command, double value);
+        Task<List<CPUDataModel>> DeserializeIntoCPUData(string jsonData);
+        Task GetCPUData(ClientModel client);
+        Task SetSensorTimer(ClientModel client, double interval);
     }
 
 }

@@ -30,7 +30,7 @@ namespace CPULogServer
             services.AddControllers();
 
             //Services
-            services.AddScoped<IServerService, ServerService>();
+            services.AddSingleton<IServerService, ServerService>();
 
             //Logger
             services.AddLogging(builder =>

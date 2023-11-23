@@ -1,6 +1,8 @@
-﻿using CPULogServer.Services.ServerService;
+﻿using CPULogServer.Models;
+using CPULogServer.Services.ServerService;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
+using System.Linq;
 
 namespace CPULogServer.Controllers
 {
@@ -11,7 +13,6 @@ namespace CPULogServer.Controllers
 
         private IServerService _serverService;
         private ILogger _logger;
-
         public ServerController(IServerService service, ILogger<ServerController> logger)
         {
             _serverService = service;
@@ -23,6 +24,24 @@ namespace CPULogServer.Controllers
         {
             _serverService.StartServer();
             return Ok("Server started successfully!");
+        }
+
+        [HttpGet("getData")]
+        public IActionResult GetData()
+        {
+            ClientModel client = new ClientModel();
+            client.Ip = "127.0.0.1";
+            _serverService.GetCPUData(client);
+            return Ok("Request sent!");
+        }
+
+        [HttpPost("setTimer")]
+        public IActionResult SetSensorTimer(double value)
+        {
+            ClientModel client = new ClientModel();
+            client.Ip = "127.0.0.1";
+            _serverService.SetSensorTimer(client, value);
+            return Ok("Request sent!");
         }
 
     }
