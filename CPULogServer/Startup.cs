@@ -1,3 +1,6 @@
+using CPULogServer.Data;
+using CPULogServer.Services.ClientService;
+using CPULogServer.Services.CPUDataService;
 using CPULogServer.Services.ServerService;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
@@ -27,11 +30,26 @@ namespace CPULogServer
         // This method gets called by the runtime. Use this method to add services to the container.
         public void ConfigureServices(IServiceCollection services)
         {
+            //Database
+            services.AddDbContext<DataContext>();
+
+            //Controllers
             services.AddControllers();
 
             //Services
             services.AddSingleton<IServerService, ServerService>();
-
+            services.AddScoped<ICPUDataService, CPUDataService>();
+            services.AddScoped<IClientService, ClientService>();
+            //CORS
+            services.AddCors(options =>
+            {
+                options.AddDefaultPolicy(builder =>
+                {
+                    builder.AllowAnyOrigin()
+                           .AllowAnyHeader()
+                           .AllowAnyMethod();
+                });
+            });
             //Logger
             services.AddLogging(builder =>
             {
@@ -64,6 +82,8 @@ namespace CPULogServer
             app.UseHttpsRedirection();
 
             app.UseRouting();
+
+            app.UseCors();
 
             app.UseAuthorization();
 

@@ -12,7 +12,7 @@ namespace CPULogServer.Controllers
     {
 
         private IServerService _serverService;
-        private ILogger _logger;
+        private ILogger<ServerController> _logger;
         public ServerController(IServerService service, ILogger<ServerController> logger)
         {
             _serverService = service;

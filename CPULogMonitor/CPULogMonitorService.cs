@@ -14,7 +14,7 @@ namespace CPULogMonitor
 
         private Timer _reconectTimer;
         private Timer _sensorTimer;
-        public double reconnectInterval = 6000;
+        public double reconnectInterval = 1000;
         public double sensorInterval = 6000;
         public CPULogMonitorService()
         {
@@ -40,23 +40,18 @@ namespace CPULogMonitor
             _tcpManager.ConnectToServer();
         }
 
-        private async void OnSensorTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnSensorTimerElapsed(object sender, ElapsedEventArgs e)
         {
             CPUDataModel data = _dataCollector.CollectData();
             _logger.WriteToFile($"{DateTime.Now}: Sensor Timer Elapsed Interval: {_sensorTimer.Interval}!");
         }
 
-        private async void OnReconectTimerElapsed(object sender, ElapsedEventArgs e)
+        private void OnReconectTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            if (!_tcpManager._tcpClient.Connected)
+            if (!_tcpManager.Connected)
             {
+                _logger.WriteToFile($"{DateTime.Now}: Reconnecting...");
                 _tcpManager.ConnectToServer();
-            }
-            else if (!_tcpManager.Listening)
-            {
-                _tcpManager.Listening = true;
-                await Task.Run(() => _tcpManager.ListenForServerRequests());
-                _tcpManager.Listening = false;
             }
             if (_tcpManager.SensorInterval != _sensorTimer.Interval)
             {

@@ -53,21 +53,11 @@ public class DataCollector
         _logger.WriteToFile($"{DateTime.Now}: Collecting data from CPU...");
 
         CPUDataModel data = new CPUDataModel();
-        IPHostEntry host = Dns.GetHostEntry(Dns.GetHostName());
-        string address = "";
-        foreach (var ip in host.AddressList)
-        {
-            if (ip.AddressFamily == AddressFamily.InterNetwork)
-            {
-                address = ip.ToString();
-            }
-        }
-        data.Address = address;
         data.Temperature = GetCPUTemperature();
         data.Load = GetCPULoad();
         data.Timestamp = DateTime.Now;
 
-        _logger.WriteToFile($"{DateTime.Now}: CPU data collected: {data.Address}, {data.Temperature}, {data.Load}, ");
+        _logger.WriteToFile($"{DateTime.Now}: CPU data collected: {data.Temperature}, {data.Load} ");
 
         AppendDataToJsonFile(data);
 
