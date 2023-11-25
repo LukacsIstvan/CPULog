@@ -28,6 +28,11 @@ namespace CPULogServer.Controllers
         {
             return Ok(_cpuDataService.Get(id).Result);
         }
+        [HttpGet("get/client/{id}")]
+        public IActionResult GetByClient(int id)
+        {
+            return Ok(_cpuDataService.GetByClient(id).Result);
+        }
         [HttpPost]
         public async Task<ActionResult> Store(CPUDataModel cpuData)
         {

@@ -44,5 +44,12 @@ namespace CPULogServer.Services.ClientService
             ClientModel result = await _context.Clients.SingleOrDefaultAsync<ClientModel>(c => c.Id == id);
             _context.Entry(result).State = EntityState.Detached;
         }
+        public async Task SetSensor(int id, double value)
+        {
+            ClientModel client = await _context.Clients.FirstAsync(c => c.Id == id);
+            client.SensorTimer = value;
+            _context.Clients.Update(client);
+            await _context.SaveChangesAsync();
+        }
     }
 }

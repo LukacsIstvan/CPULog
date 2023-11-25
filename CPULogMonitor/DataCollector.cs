@@ -14,10 +14,10 @@ public class DataCollector
 
     public DataCollector(Logger logger)
     {
-        _logger = logger;
         _computer = new Computer();
         _computer.CPUEnabled = true;
         _computer.Open();
+        _logger = logger;
     }
     private void AppendDataToJsonFile(CPUDataModel data)
     {
@@ -72,7 +72,7 @@ public class DataCollector
         {
             if (sensor.SensorType == SensorType.Temperature)
             {
-                _logger.WriteToFile($"{DateTime.Now}: Sensor found!");
+                //_logger.WriteToFile($"{DateTime.Now}: Sensor found!");
                 return sensor.Value;
             }
         }
@@ -82,17 +82,17 @@ public class DataCollector
 
     private float? GetCPULoad()
     {
-        _logger.WriteToFile($"{DateTime.Now}: Collecting load data...");
+        //_logger.WriteToFile($"{DateTime.Now}: Collecting load data...");
         _computer.Hardware[0].Update();
         foreach (var sensor in _computer.Hardware[0].Sensors)
         {
             if (sensor.SensorType == SensorType.Load)
             {
-                _logger.WriteToFile($"{DateTime.Now}: Sensor found!");
+                //_logger.WriteToFile($"{DateTime.Now}: Sensor found!");
                 return sensor.Value;
             }
         }
-        _logger.WriteToFile($"{DateTime.Now}: Error: No load sensor found!");
+        //_logger.WriteToFile($"{DateTime.Now}: Error: No load sensor found!");
         return null;
     }
 }

@@ -25,6 +25,11 @@ namespace CPULogServer.Services.CPUDataService
             await _context.CPUData.AddAsync(cpuData);
             await _context.SaveChangesAsync();
         }
+        public async Task<List<CPUDataModel>> GetByClient(int id)
+        {
+            List<CPUDataModel> result = await _context.CPUData.Where(c => c.ClientModel.Id==id).ToListAsync<CPUDataModel>();
+            return result;
+        }
 
         public async Task<CPUDataModel> Get(int id)
         {

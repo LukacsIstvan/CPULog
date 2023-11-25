@@ -34,15 +34,22 @@ namespace CPULogServer.Controllers
         {
             return Ok(_clientService.Store(cpuData));
         }
+        /*
         [HttpPut]
         public async Task<ActionResult> Update(int id)
         {
             return Ok(_clientService.Delete(id));
-        }
+        }*/
         [HttpDelete]
         public async Task<ActionResult> Delete(int id)
         {
             return Ok(_clientService.Delete(id));
+        }
+        [HttpPost("timer")]
+        public IActionResult SetSensorTimer(int id, double value)
+        {
+            _clientService.SetSensor(id, value);
+            return Ok("Request sent!");
         }
     }
 }

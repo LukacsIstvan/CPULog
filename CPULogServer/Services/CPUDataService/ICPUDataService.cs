@@ -11,5 +11,6 @@ namespace CPULogServer.Services.CPUDataService
         Task<List<CPUDataModel>> Get();
         Task Update(int id, CPUDataModel cpuData);
         Task Delete(int id);
+        Task<List<CPUDataModel>> GetByClient(int id);
     }
 }

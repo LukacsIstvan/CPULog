@@ -11,5 +11,6 @@ namespace CPULogServer.Services.ClientService
         Task<List<ClientModel>> Get();
         Task Update(int id, ClientModel cpuData);
         Task Delete(int id);
+        Task SetSensor(int id, double value);
     }
 }

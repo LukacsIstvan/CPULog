@@ -37,7 +37,7 @@ namespace CPULogMonitor
             _sensorTimer.Elapsed += OnSensorTimerElapsed;
             _sensorTimer.Start();
 
-            _tcpManager.ConnectToServer();
+            _tcpManager.Start();
         }
 
         private void OnSensorTimerElapsed(object sender, ElapsedEventArgs e)
@@ -48,11 +48,13 @@ namespace CPULogMonitor
 
         private void OnReconectTimerElapsed(object sender, ElapsedEventArgs e)
         {
+            
             if (!_tcpManager.Connected)
             {
                 _logger.WriteToFile($"{DateTime.Now}: Reconnecting...");
-                _tcpManager.ConnectToServer();
+                _tcpManager.Start();
             }
+            
             if (_tcpManager.SensorInterval != _sensorTimer.Interval)
             {
                 _sensorTimer.Interval = _tcpManager.SensorInterval;
@@ -63,7 +65,6 @@ namespace CPULogMonitor
         {
             _sensorTimer.Stop();
             _reconectTimer.Stop();
-            _tcpManager.Dispose();
             _logger.WriteToFile($"{DateTime.Now}: Service stopped!");
         }
     }

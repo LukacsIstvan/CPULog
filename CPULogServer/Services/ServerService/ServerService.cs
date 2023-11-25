@@ -5,161 +5,190 @@ using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json;
 using CPULogServer.Models;
-using System.IO;
 using System.Text;
 using System.Collections.Generic;
-using System.Runtime.CompilerServices;
-using CPULogServer.Services.CPUDataService;
 using CPULogServer.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
+using System.Threading;
 
 namespace CPULogServer.Services.ServerService
 {
     public class ServerService : IServerService
     {
         private readonly ILogger<ServerService> _logger;
-        private readonly TcpListener _tcpListener;
+        private readonly TcpListener _tcpListener = null;
         private List<TcpClient> _connectedClients;
 
+        
         public ServerService(ILogger<ServerService> logger)
         {
             _logger = logger;
-            _tcpListener = new TcpListener(IPAddress.Parse("127.0.0.1"), 12345);
+            IPAddress localAddr = IPAddress.Parse("127.0.0.1");
+            _tcpListener = new TcpListener(localAddr, 12345);
             _connectedClients = new List<TcpClient>();
         }
-        public async Task StoreCPUData(CPUDataModel data)
+
+        public Task StartServer()
         {
-            
+            Task.Run(() =>
+            {
+                _tcpListener.Start();
+                StartListener();
+            });
+
+            _logger.LogInformation("Server Started!");
+            return Task.CompletedTask;
+        }
+        private void StartListener()
+        {
+            try
+            {
+                while (true)
+                {
+                    _logger.LogInformation("Waiting for a connection...");
+
+                    TcpClient client = _tcpListener.AcceptTcpClient();
+                    _connectedClients.Add(client);
+                    _logger.LogInformation($"Client conected!");
+
+                    IPAddress clientIpAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
+                    ClientModel model = new ClientModel();
+                    model.Ip = clientIpAddress.ToString();
+                    Task.Run(() => StoreClientData(model));
+
+                    Task.Run(() => ReciveData(client));
+
+                    Task.Run(() => SendSensorRequest(client));
+                }
+            }
+            catch (SocketException e)
+            {
+                _logger.LogError($"SocketException: {e}");
+                _tcpListener.Stop();
+            }
+        }
+
+        private void ReciveData(TcpClient client)
+        {
+            var stream = client.GetStream();
+
+            string data = null;
+            Byte[] bytes = new Byte[256];
+            int i;
+            try
+            {
+                while ((i = stream.Read(bytes, 0, bytes.Length)) != 0)
+                {
+                    data = Encoding.ASCII.GetString(bytes, 0, i);
+                    ProcessData(data, ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString());
+
+                    string str = "RECIVED";
+                    Byte[] reply = Encoding.ASCII.GetBytes(str);
+                    stream.Write(reply, 0, reply.Length);
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception: {e}");
+                client.Close();
+            }
+        }
+
+        private void SendDataToClient(TcpClient client, string data)
+        {
+            try
+            {
+                if (client.Client != null && client.Client.Connected)
+                {
+                    NetworkStream stream = client.GetStream();
+                    byte[] bytes = Encoding.ASCII.GetBytes(data);
+                    stream.Write(bytes, 0, bytes.Length);
+                    _logger.LogInformation("Sent to client: ", data);
+                }
+                else
+                {
+                    _logger.LogInformation("Client is not connected. Cannot send data.");
+                }
+            }
+            catch (Exception e)
+            {
+                _logger.LogError($"Exception: {e}");
+            }
+        }
+
+        private async void SendSensorRequest(TcpClient client)
+        {
+            double SensorTimer = 6000;
+            if (!client.Connected)
+            {
+                using (var context = new DataContext(new DbContextOptions<DataContext>()))
+                {
+                    string clientIpAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
+                    ClientModel dbClient = await context.Clients.FirstAsync(c => c.Ip == clientIpAddress);
+                    SensorTimer = dbClient.SensorTimer;
+                }
+
+                while (true)
+                {
+                    string request = $"SET_SENSOR:{SensorTimer}";
+                    SendDataToClient(client, request);
+                    Thread.Sleep(6000);
+                }
+            }
+        }
+
+        private async Task StoreClientData(ClientModel client)
+        {
             using (var context = new DataContext(new DbContextOptions<DataContext>()))
             {
-                await context.CPUData.AddAsync(data);
-                await context.SaveChangesAsync();
-                _logger.LogInformation($"CPUData stored {context.Database.ProviderName}");
-            }
-        }
-        public async Task StoreClientData(ClientModel client)
-        {
-            using (var context = new DataContext(new DbContextOptions<DataContext>()))
-            {
-                await context.AddAsync(client);
-                await context.SaveChangesAsync();
-                _logger.LogInformation($"Client stored {context.Database.ProviderName}");
-            }
-        }
+                bool clientExists = await context.Clients.AnyAsync(c => c.Ip == client.Ip);
 
-        public async Task GetCPUData(ClientModel client) 
-        {
-            TcpClient tcpClient = _connectedClients.Find(c => 
-                ((IPEndPoint)c.Client.RemoteEndPoint).Address.ToString()==client.Ip);
-
-            string json = await SendRequest(tcpClient, "REQUEST_CPU_DATA",0);
-
-            List<CPUDataModel> cpuData = await DeserializeIntoCPUData(json);
-
-            foreach (CPUDataModel cpu in cpuData)
-            {
-                cpu.Ip = client.Ip;
-            }
-            
-            foreach (CPUDataModel cpu in cpuData)
-            {
-                await StoreCPUData(cpu);
+                if (!clientExists)
+                {
+                    client.SensorTimer = 6000;
+                    await context.AddAsync(client);
+                    await context.SaveChangesAsync();
+                    _logger.LogInformation($"Client stored");
+                }
+                else
+                {
+                    _logger.LogInformation($"Client with IP {client.Ip} already exists.");
+                }
             }
         }
 
-        public async Task SetSensorTimer(ClientModel client, double value)
-        {
-            TcpClient tcpClient = _connectedClients.Find(c =>
-                ((IPEndPoint)c.Client.RemoteEndPoint).Address.ToString() == client.Ip);
-
-            string response = await SendRequest(tcpClient, "SET_SENSOR_TIMER", value);
-
-            _logger.LogInformation($"Recived message from client {response}");
-        }
-
-        public async Task<List<CPUDataModel>> DeserializeIntoCPUData(string jsonData)
+        private async void ProcessData(string jsonData, string ip)
         {
             if (!string.IsNullOrEmpty(jsonData))
             {
                 try
                 {
-                    List<CPUDataModel> cpuData = JsonConvert.DeserializeObject<List<CPUDataModel>>(jsonData);
-                    foreach (var cpu in cpuData)
+                    using (var context = new DataContext(new DbContextOptions<DataContext>()))
                     {
-                        _logger.LogInformation($"CPU Data: Temperature = {cpu.Temperature}, Load = {cpu.Load}");
+                        List<CPUDataModel> cpuData = JsonConvert.DeserializeObject<List<CPUDataModel>>(jsonData);
+                        foreach (var cpu in cpuData)
+                        {
+                            ClientModel client = await context.Clients.FirstAsync(c => c.Ip == ip);
+                            cpu.ClientModel = client;
+                            cpu.Ip = client.Ip;
+                            await StoreCPUData(cpu, context);
+                            _logger.LogInformation($"CPU Data: Temperature = {cpu.Temperature}, Load = {cpu.Load}");
+                        }
                     }
-                    return cpuData;
                 }
-                catch (JsonException ex)
+                catch (JsonException e)
                 {
-                    _logger.LogError($"JsonException in DeserializeIntoCPUData: {ex.Message}");
-                    return null;
+                    _logger.LogError($"JsonException:  {e}");
                 }
             }
             else _logger.LogInformation($"Recived data is null");
-            return null;
         }
 
-        public async Task<string> SendRequest(TcpClient client, string command, double value)
+        private async Task StoreCPUData(CPUDataModel data, DataContext context)
         {
-            try
-            {
-                if (client == null)
-                {
-                    _logger.LogError("TcpClient is null.");
-                    return null;
-                }
-                using (var stream = client.GetStream())
-                using (var reader = new StreamReader(stream, Encoding.UTF8))
-                using (var writer = new StreamWriter(stream, Encoding.UTF8) { AutoFlush = true })
-                {
-                    await writer.WriteLineAsync($"{command}:{value}");
-                    _logger.LogInformation($"Sent request for CPU data to the client.");
-
-                    string jsonData = await reader.ReadLineAsync();
-
-                    return jsonData;
-                }
-            }
-            catch (Exception ex)
-            {
-                _logger.LogError($"Exception in SendRequest: {ex.Message}");
-            }
-            return null;
+            await context.CPUData.AddAsync(data);
+            await context.SaveChangesAsync();
+            _logger.LogInformation($"CPUData stored!");
         }
-        public async Task StartServer()
-        {
-            try
-            {
-                _tcpListener.Start();
-                _logger.LogInformation($"Server is listening!");
-
-                while (true)
-                {
-                    TcpClient tcpClient = await _tcpListener.AcceptTcpClientAsync();
-
-                    ClientModel client = new ClientModel();
-                    client.Ip = ((IPEndPoint)tcpClient.Client.RemoteEndPoint).Address.ToString();
-                    _connectedClients.Add(tcpClient);
-                     await StoreClientData(client);
-                    _logger.LogInformation($"Client connected: {client.Ip}");
-                }
-            }
-            catch (SocketException ex)
-            {
-                _logger.LogInformation($"SocketException: {ex.SocketErrorCode}, {ex.Message}");
-            }
-            catch (Exception ex)
-            {
-                _logger.LogInformation($"Exception: {ex.Message}");
-            }
-            finally
-            {
-                _tcpListener.Stop();
-                _logger.LogInformation("Server stopped.");
-            }
-        }
-
     }
 }
