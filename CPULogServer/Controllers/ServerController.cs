@@ -20,7 +20,7 @@ namespace CPULogServer.Controllers
             _logger = logger;
         }
 
-        [HttpPost("start")]
+        [HttpGet("start")]
         public IActionResult StartServer()
         {
             _serverService.StartServer();

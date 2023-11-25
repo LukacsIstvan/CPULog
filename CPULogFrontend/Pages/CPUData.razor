@@ -1,0 +1,48 @@
+﻿@page "/cpudata"
+@using CPULogFrontend.Models;
+@using CPULogFrontend.Services.CpuDataService;
+@inject HttpClient http;
+@inject ICPUDataService cpuDataService;
+<h3>CPUData</h3>
+
+@if (cpuDataService.CPUData == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Address</th>
+                <th>Load</th>
+                <th>Temp. (C)</th>
+                <th>Timestamp</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var cpu in cpuDataService.CPUData)
+            {
+                <tr>
+                    <td>@cpu.Id</td>
+                    <td>@cpu.Ip</td>
+                    <td>@cpu.Load?.ToString("N0") %</td>
+                    <td>@cpu.Temperature °C</td>
+                    <td>@cpu.Timestamp</td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await cpuDataService.Get();
+    }
+
+}

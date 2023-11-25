@@ -9,7 +9,6 @@ using System.Text;
 using System.Collections.Generic;
 using CPULogServer.Data;
 using Microsoft.EntityFrameworkCore;
-using System.Threading;
 
 namespace CPULogServer.Services.ServerService
 {
@@ -68,8 +67,9 @@ namespace CPULogServer.Services.ServerService
             }
         }
 
-        private void ReciveData(TcpClient client)
+        private Task ReciveData(TcpClient client)
         {
+            Task.Delay(60000);
             var stream = client.GetStream();
 
             string data = null;
@@ -92,6 +92,7 @@ namespace CPULogServer.Services.ServerService
                 _logger.LogError($"Exception: {e}");
                 client.Close();
             }
+            return Task.CompletedTask;
         }
 
         private void SendDataToClient(TcpClient client, string data)
@@ -116,9 +117,9 @@ namespace CPULogServer.Services.ServerService
             }
         }
 
-        private async void SendSensorRequest(TcpClient client)
+        private async Task SendSensorRequest(TcpClient client)
         {
-            double SensorTimer = 6000;
+            double SensorTimer = 60000;
             if (!client.Connected)
             {
                 using (var context = new DataContext(new DbContextOptions<DataContext>()))
@@ -132,7 +133,8 @@ namespace CPULogServer.Services.ServerService
                 {
                     string request = $"SET_SENSOR:{SensorTimer}";
                     SendDataToClient(client, request);
-                    Thread.Sleep(6000);
+                    Task.Delay(3000);
+                    
                 }
             }
         }

@@ -5,9 +5,12 @@ VisualStudioVersion = 17.7.34031.279
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPULogMonitor", "CPULogMonitor\CPULogMonitor.csproj", "{7FC60A5A-AA18-4CD3-B130-8D67649A9916}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPULogServer", "CPULogServer\CPULogServer.csproj", "{30C30C3C-B978-43E1-A593-37FF8935B7EA}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CPULogServer", "CPULogServer\CPULogServer.csproj", "{30C30C3C-B978-43E1-A593-37FF8935B7EA}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "CPULogFrontend", "CPULogFrontend\CPULogFrontend.csproj", "{52C84469-6F0A-4B0C-8C3C-49079CD6BA6F}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CPULogFrontend", "CPULogFrontend\CPULogFrontend.csproj", "{52C84469-6F0A-4B0C-8C3C-49079CD6BA6F}"
+	ProjectSection(ProjectDependencies) = postProject
+		{30C30C3C-B978-43E1-A593-37FF8935B7EA} = {30C30C3C-B978-43E1-A593-37FF8935B7EA}
+	EndProjectSection
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

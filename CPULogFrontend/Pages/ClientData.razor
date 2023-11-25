@@ -1,0 +1,100 @@
+﻿@page "/clientdata"
+@using CPULogFrontend.Models;
+@using CPULogFrontend.Services.ClientService;
+@using CPULogFrontend.Services.CpuDataService;
+@inject HttpClient http;
+@inject IClientService clientService;
+@inject ICPUDataService cpudataService;
+<h3>Clients</h3>
+
+@if (clientService.Clients == null)
+{
+    <p><em>Loading...</em></p>
+}
+
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Address</th>
+                <th>Edit</th>
+                <th>CPUData</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var client in clientService.Clients)
+            {
+                <tr>
+                    <td>@client.Id</td>
+                    <td>@client.Ip</td>
+                    <td>@client.SensorTimer ms</td>
+                    <td><button class="btn btn-primary" @onclick="args => ShowCpuData(client.Id)">show cpu</button></td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+
+@if (show)
+{
+    @if (cpudataService.CPUData == null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else
+    {
+        <h2>CPU data</h2>
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Address</th>
+                    <th>Load</th>
+                    <th>Temp. (C)</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cpu in cpudataService.CPUData)
+                {
+                    <tr>
+                        <td>@cpu.Id</td>
+                        <td>@cpu.Ip</td>
+                        <td>@cpu.Load?.ToString("N0") %</td>
+                        <td>@cpu.Temperature °C</td>
+                        <td>@cpu.Timestamp</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
+
+@code {
+    protected override async Task OnInitializedAsync()
+    {
+        await clientService.Get();
+    }
+
+    public bool show = false; 
+    private async void ShowCpuData(int id)
+    {
+        show = true;
+        await cpudataService.GetByClient(id);
+    }
+
+    public bool editSensor = false;
+    private async void EditSensor(int id)
+    {
+        editSensor = true;
+    }
+
+    private async void SetSensor(int id, double value)
+    {
+        await clientService.SetSensor(id, value);
+        editSensor = false;
+    }
+}
