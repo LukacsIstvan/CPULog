@@ -2,9 +2,9 @@
 
 namespace CPULogServer.Models
 {
-    public class CPUDataModel
+    public class CPUData
     {
-        public ClientModel ClientModel { get; set; }
+        public Client ClientModel { get; set; }
         public int Id { get; set; }
         public string Ip { get; set; }
         public float? Temperature { get; set; }

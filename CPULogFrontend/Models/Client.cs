@@ -1,6 +1,6 @@
 ﻿namespace CPULogFrontend.Models
 {
-    public class ClientVM
+    public class Client
     {
         public int Id { get; set; }
         public string Ip { get; set; }

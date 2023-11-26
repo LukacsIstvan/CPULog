@@ -6,10 +6,10 @@ namespace CPULogServer.Services.ClientService
 {
     public interface IClientService
     {
-        Task Store(ClientModel cpuData);
-        Task<ClientModel> Get(int id);
-        Task<List<ClientModel>> Get();
-        Task Update(int id, ClientModel cpuData);
+        Task Store(Client cpuData);
+        Task<Client> Get(int id);
+        Task<List<Client>> Get();
+        Task Update(int id, Client cpuData);
         Task Delete(int id);
         Task SetSensor(int id, double value);
     }

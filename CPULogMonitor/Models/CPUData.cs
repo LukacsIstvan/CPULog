@@ -1,11 +1,10 @@
 ﻿using System;
 
-namespace CPULogFrontend.Models
+namespace CPULogMonitor.Models
 {
-    public class CPUDataVM
+    public class CPUData
     {
-
-        public ClientVM ClientModel { get; set; }
+        public Client ClientModel { get; set; }
         public int Id { get; set; }
         public string Ip { get; set; }
         public float? Temperature { get; set; }

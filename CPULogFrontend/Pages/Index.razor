@@ -1,20 +1,25 @@
 ﻿@page "/"
-@using CPULogFrontend.Services.ServerService;
-@inject HttpClient http;
-@inject IServerService serverService;
+@using System.Net.Http.Headers;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+<h1>Welcome!</h1>
 
-<h1>Cpu Log</h1>
-
-Welcome!
-<br>
-<button class="btn btn-primary" @onclick="StartServer">start server</button>
+@if (IsAuthenticated)
+{
+    <p>Please login to use the server features.</p>
+    <div class="text-center">
+        <a href="/login">Login</a>
+    </div>
+}
+else
+{
+    <p>User logged in!</p>
+}
 
 @code
 {
+    private AuthenticationState authState;
 
-    public async void StartServer()
-    {
-        await serverService.StartServer();
-    }
-
+    private bool IsAuthenticated => authState?.User?.Identity?.IsAuthenticated ?? false;
+    
 }

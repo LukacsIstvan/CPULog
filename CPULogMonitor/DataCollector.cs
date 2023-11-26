@@ -19,7 +19,7 @@ public class DataCollector
         _computer.Open();
         _logger = logger;
     }
-    private void AppendDataToJsonFile(CPUDataModel data)
+    private void AppendDataToJsonFile(CPUData data)
     {
         try
         {
@@ -37,7 +37,7 @@ public class DataCollector
                 jsonData = System.IO.File.ReadAllText(filePath);
             }
 
-            var dataList = JsonConvert.DeserializeObject<List<CPUDataModel>>(jsonData) ?? new List<CPUDataModel>();
+            var dataList = JsonConvert.DeserializeObject<List<CPUData>>(jsonData) ?? new List<CPUData>();
             dataList.Add(data);
             jsonData = JsonConvert.SerializeObject(dataList);
             System.IO.File.WriteAllText(filePath, jsonData);
@@ -48,11 +48,11 @@ public class DataCollector
         }
     }
 
-    public CPUDataModel CollectData()
+    public CPUData CollectData()
     {
         _logger.WriteToFile($"{DateTime.Now}: Collecting data from CPU...");
 
-        CPUDataModel data = new CPUDataModel();
+        CPUData data = new CPUData();
         data.Temperature = GetCPUTemperature();
         data.Load = GetCPULoad();
         data.Timestamp = DateTime.Now;
@@ -72,7 +72,6 @@ public class DataCollector
         {
             if (sensor.SensorType == SensorType.Temperature)
             {
-                //_logger.WriteToFile($"{DateTime.Now}: Sensor found!");
                 return sensor.Value;
             }
         }
@@ -82,17 +81,14 @@ public class DataCollector
 
     private float? GetCPULoad()
     {
-        //_logger.WriteToFile($"{DateTime.Now}: Collecting load data...");
         _computer.Hardware[0].Update();
         foreach (var sensor in _computer.Hardware[0].Sensors)
         {
             if (sensor.SensorType == SensorType.Load)
             {
-                //_logger.WriteToFile($"{DateTime.Now}: Sensor found!");
                 return sensor.Value;
             }
         }
-        //_logger.WriteToFile($"{DateTime.Now}: Error: No load sensor found!");
         return null;
     }
 }

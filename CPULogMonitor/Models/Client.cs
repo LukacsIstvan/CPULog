@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace CPULogMonitor.Models
 {
-    public class ClientModel
+    public class Client
     {
         public int Id { get; set; }
         public string Ip { get; set; }

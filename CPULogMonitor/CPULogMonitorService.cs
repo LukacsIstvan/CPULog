@@ -42,7 +42,7 @@ namespace CPULogMonitor
 
         private void OnSensorTimerElapsed(object sender, ElapsedEventArgs e)
         {
-            CPUDataModel data = _dataCollector.CollectData();
+            CPUData data = _dataCollector.CollectData();
             _logger.WriteToFile($"{DateTime.Now}: Sensor Timer Elapsed Interval: {_sensorTimer.Interval}!");
         }
 

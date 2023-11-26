@@ -3,7 +3,7 @@ using System.Net.Sockets;
 
 namespace CPULogServer.Models
 {
-    public class ClientModel
+    public class Client
     {
         public int Id { get; set; }
         public string Ip { get; set; }

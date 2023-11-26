@@ -9,44 +9,44 @@ namespace CPULogServer.Services.ClientService
 {
     public class ClientService : IClientService
     {
-        private readonly ILogger<ClientModel> _logger;
+        private readonly ILogger<Client> _logger;
         private readonly DataContext _context;
-        public ClientService(ILogger<ClientModel> logger, DataContext context)
+        public ClientService(ILogger<Client> logger, DataContext context)
         {
             _logger = logger;
             _context = context;
         }
 
-        public async Task Store(ClientModel client)
+        public async Task Store(Client client)
         {
             await _context.Clients.AddAsync(client);
             await _context.SaveChangesAsync();
         }
 
-        public async Task<ClientModel> Get(int id)
+        public async Task<Client> Get(int id)
         {
-            ClientModel result = await _context.Clients.SingleOrDefaultAsync<ClientModel>(c => c.Id == id);
+            Client result = await _context.Clients.SingleOrDefaultAsync<Client>(c => c.Id == id);
             return result;
         }
-        public async Task<List<ClientModel>> Get()
+        public async Task<List<Client>> Get()
         {
-            List<ClientModel> result = await _context.Clients.ToListAsync<ClientModel>();
+            List<Client> result = await _context.Clients.ToListAsync<Client>();
             return result;
         }
 
-        public async Task Update(int id, ClientModel client)
+        public async Task Update(int id, Client client)
         {
-            ClientModel result = await _context.Clients.SingleOrDefaultAsync<ClientModel>(c => c.Id == id);
+            Client result = await _context.Clients.SingleOrDefaultAsync<Client>(c => c.Id == id);
             _context.Entry(result).CurrentValues.SetValues(client);
         }
         public async Task Delete(int id)
         {
-            ClientModel result = await _context.Clients.SingleOrDefaultAsync<ClientModel>(c => c.Id == id);
+            Client result = await _context.Clients.SingleOrDefaultAsync<Client>(c => c.Id == id);
             _context.Entry(result).State = EntityState.Detached;
         }
         public async Task SetSensor(int id, double value)
         {
-            ClientModel client = await _context.Clients.FirstAsync(c => c.Id == id);
+            Client client = await _context.Clients.FirstAsync(c => c.Id == id);
             client.SensorTimer = value;
             _context.Clients.Update(client);
             await _context.SaveChangesAsync();

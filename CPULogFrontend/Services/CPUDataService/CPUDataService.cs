@@ -8,7 +8,7 @@ namespace CPULogFrontend.Services.CpuDataService
 {
     public class CPUDataService : ICPUDataService
     {
-        public List<CPUDataVM> CPUData { get; set; }
+        public List<CPUData> CPUData { get; set; }
         private readonly HttpClient _httpClient;
         public CPUDataService(HttpClient httpClient)
         {
@@ -17,13 +17,13 @@ namespace CPULogFrontend.Services.CpuDataService
 
         public async Task Get()
         {
-            List<CPUDataVM> result = await _httpClient.GetFromJsonAsync<List<CPUDataVM>>("api/CPUData/get");
+            List<CPUData> result = await _httpClient.GetFromJsonAsync<List<CPUData>>("api/CPUData/get");
             CPUData = result;
         }
 
         public async Task GetByClient(int id)
         {
-            List<CPUDataVM> result = await _httpClient.GetFromJsonAsync<List<CPUDataVM>>($"api/CPUData/get/client/{id}");
+            List<CPUData> result = await _httpClient.GetFromJsonAsync<List<CPUData>>($"api/CPUData/get/client/{id}");
             CPUData = result;
         }
     }

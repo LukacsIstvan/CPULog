@@ -6,11 +6,11 @@ namespace CPULogServer.Services.CPUDataService
 {
     public interface ICPUDataService
     {
-        Task Store(CPUDataModel cpuData);
-        Task<CPUDataModel> Get(int id);
-        Task<List<CPUDataModel>> Get();
-        Task Update(int id, CPUDataModel cpuData);
+        Task Store(CPUData cpuData);
+        Task<CPUData> Get(int id);
+        Task<List<CPUData>> Get();
+        Task Update(int id, CPUData cpuData);
         Task Delete(int id);
-        Task<List<CPUDataModel>> GetByClient(int id);
+        Task<List<CPUData>> GetByClient(int id);
     }
 }

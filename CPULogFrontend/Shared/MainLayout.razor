@@ -1,15 +1,53 @@
 ﻿@inherits LayoutComponentBase
-
+@using CPULogFrontend.Services.AuthService
+@using Microsoft.AspNetCore.Components.Authorization
+@inject AuthenticationStateProvider AuthenticationStateProvider
+@inject AuthService authService
 <div class="sidebar">
     <NavMenu />
 </div>
 
 <div class="main">
     <div class="top-row px-4">
-        <a href="login"  class="ml-md-auto">Login</a>
+        @if (IsAuthenticated)
+        {
+            <a href=# @onclick=TryLogout class="ml-md-auto">Logout</a>
+        }
+        else
+        {
+            <a href="login" class="ml-md-auto">Login</a>
+        }
     </div>
 
     <div class="content px-4">
         @Body
     </div>
 </div>
+
+@code {
+    private AuthenticationState authState;
+
+    private bool IsAuthenticated => authState?.User?.Identity?.IsAuthenticated ?? false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+        AuthenticationStateProvider.AuthenticationStateChanged += HandleAuthenticationStateChanged;
+    }
+
+    private void HandleAuthenticationStateChanged(Task<AuthenticationState> task)
+    {
+        authState = task.Result;
+        StateHasChanged();
+    }
+
+    private void TryLogout()
+    {
+        authService.Logout();
+    }
+
+    public void Dispose()
+    {
+        AuthenticationStateProvider.AuthenticationStateChanged -= HandleAuthenticationStateChanged;
+    }
+}

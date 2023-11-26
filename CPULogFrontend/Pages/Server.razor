@@ -1,0 +1,46 @@
+﻿@page "/server"
+@using System.Net.Http.Headers;
+@using CPULogFrontend.Services.ServerService;
+@using Microsoft.AspNetCore.Components.Authorization;
+@inject IServerService serverService
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
+<h3>Server</h3>
+@if (responseMessage != string.Empty)
+{
+    <!-- Display server response -->
+    <div class="alert alert-info">
+        <strong>Info!</strong> @responseMessage
+    </div>
+}
+@if (IsAuthenticated)
+{
+    <button class="btn btn-primary" @onclick="StartServer">start server</button>
+}
+else
+{
+    <p>You need to log in to access this page.</p>
+    <div class="text-center">
+        <a href="/login">Login</a>
+    </div>
+}
+@code {
+
+    private string responseMessage = string.Empty;
+
+    private AuthenticationState authState;
+
+    private bool IsAuthenticated => authState?.User?.Identity?.IsAuthenticated ?? false;
+
+    protected override async Task OnInitializedAsync()
+    {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
+    }
+
+    public async void StartServer()
+    {
+        responseMessage = "Server Started!";
+        await serverService.StartServer();
+    }
+
+}

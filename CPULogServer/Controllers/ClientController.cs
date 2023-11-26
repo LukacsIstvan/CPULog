@@ -1,9 +1,11 @@
 ﻿using CPULogServer.Models;
 using CPULogServer.Services.ClientService;
 using CPULogServer.Services.CPUDataService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
+
 
 namespace CPULogServer.Controllers
 {
@@ -30,26 +32,27 @@ namespace CPULogServer.Controllers
             return Ok(_clientService.Get(id).Result);
         }
         [HttpPost]
-        public async Task<ActionResult> Store(ClientModel cpuData)
+        public async Task<ActionResult> Store(Client cpuData)
         {
             return Ok(_clientService.Store(cpuData));
         }
-        /*
+        
         [HttpPut]
-        public async Task<ActionResult> Update(int id)
+        public async Task<ActionResult> Update(int id, Client client)
         {
-            return Ok(_clientService.Delete(id));
-        }*/
+            return Ok(_clientService.Update(id, client));
+        }
         [HttpDelete]
         public async Task<ActionResult> Delete(int id)
         {
             return Ok(_clientService.Delete(id));
         }
-        [HttpPost("timer")]
-        public IActionResult SetSensorTimer(int id, double value)
+        [HttpPost("sensor")]
+        public IActionResult SetSensorTimer([FromBody] SetSensor model)
         {
-            _clientService.SetSensor(id, value);
+            _clientService.SetSensor(model.Id, model.Value);
             return Ok("Request sent!");
         }
+
     }
 }

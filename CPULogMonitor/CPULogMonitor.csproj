@@ -62,8 +62,8 @@
     </Compile>
     <Compile Include="DataCollector.cs" />
     <Compile Include="Logger.cs" />
-    <Compile Include="Models\CPUDataModel.cs" />
-    <Compile Include="Models\ClientModel.cs" />
+    <Compile Include="Models\Client.cs" />
+    <Compile Include="Models\CPUData.cs" />
     <Compile Include="Program.cs" />
     <Compile Include="ProjectInstaller.cs">
       <SubType>Component</SubType>

@@ -7,7 +7,7 @@ namespace CPULogFrontend.Services.CpuDataService
 {
     public interface ICPUDataService
     {
-        public List<CPUDataVM> CPUData { get; set; }
+        public List<CPUData> CPUData { get; set; }
 
         Task Get();
         Task GetByClient(int id);

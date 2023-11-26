@@ -1,47 +1,71 @@
 ﻿@page "/cpudata"
 @using CPULogFrontend.Models;
 @using CPULogFrontend.Services.CpuDataService;
+@using Microsoft.AspNetCore.Components.Authorization;
 @inject HttpClient http;
 @inject ICPUDataService cpuDataService;
+@inject AuthenticationStateProvider AuthenticationStateProvider
+
 <h3>CPUData</h3>
-
-@if (cpuDataService.CPUData == null)
+@if (responseMessage != string.Empty)
 {
-    <p><em>Loading...</em></p>
+    <!-- Display server response -->
+    <div class="alert alert-info">
+        <strong>Info!</strong> @responseMessage
+    </div>
 }
+@if (IsAuthenticated)
+{
+    @if (cpuDataService.CPUData == null)
+    {
+        <p><em>Loading...</em></p>
+    }
 
+    else
+    {
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Address</th>
+                    <th>Load</th>
+                    <th>Temp. (C)</th>
+                    <th>Timestamp</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var cpu in cpuDataService.CPUData)
+                {
+                    <tr>
+                        <td>@cpu.Id</td>
+                        <td>@cpu.Ip</td>
+                        <td>@cpu.Load?.ToString("N0") %</td>
+                        <td>@cpu.Temperature °C</td>
+                        <td>@cpu.Timestamp</td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+}
 else
 {
-    <table class="table">
-        <thead>
-            <tr>
-                <th>ID</th>
-                <th>Address</th>
-                <th>Load</th>
-                <th>Temp. (C)</th>
-                <th>Timestamp</th>
-            </tr>
-        </thead>
-        <tbody>
-            @foreach (var cpu in cpuDataService.CPUData)
-            {
-                <tr>
-                    <td>@cpu.Id</td>
-                    <td>@cpu.Ip</td>
-                    <td>@cpu.Load?.ToString("N0") %</td>
-                    <td>@cpu.Temperature °C</td>
-                    <td>@cpu.Timestamp</td>
-                </tr>
-            }
-        </tbody>
-    </table>
+    <p>You need to login to access this page.</p>
+    <div class="text-center">
+        <a href="/login">Login</a>
+    </div>
 }
 
 @code {
+    private string responseMessage = string.Empty;
 
+    private AuthenticationState authState;
+
+    private bool IsAuthenticated => authState?.User?.Identity?.IsAuthenticated ?? false;
 
     protected override async Task OnInitializedAsync()
     {
+        authState = await AuthenticationStateProvider.GetAuthenticationStateAsync();
         await cpuDataService.Get();
     }
 

@@ -6,7 +6,7 @@ namespace CPULogFrontend.Services.ClientService
 {
     public interface IClientService
     {
-        public List<ClientVM> Clients { get; set; }
+        public List<Client> Clients { get; set; }
 
         Task Get();
         Task Get(int id);

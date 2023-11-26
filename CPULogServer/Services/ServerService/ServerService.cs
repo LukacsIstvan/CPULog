@@ -18,7 +18,6 @@ namespace CPULogServer.Services.ServerService
         private readonly TcpListener _tcpListener = null;
         private List<TcpClient> _connectedClients;
 
-        
         public ServerService(ILogger<ServerService> logger)
         {
             _logger = logger;
@@ -51,7 +50,7 @@ namespace CPULogServer.Services.ServerService
                     _logger.LogInformation($"Client conected!");
 
                     IPAddress clientIpAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address;
-                    ClientModel model = new ClientModel();
+                    Client model = new Client();
                     model.Ip = clientIpAddress.ToString();
                     Task.Run(() => StoreClientData(model));
 
@@ -125,7 +124,7 @@ namespace CPULogServer.Services.ServerService
                 using (var context = new DataContext(new DbContextOptions<DataContext>()))
                 {
                     string clientIpAddress = ((IPEndPoint)client.Client.RemoteEndPoint).Address.ToString();
-                    ClientModel dbClient = await context.Clients.FirstAsync(c => c.Ip == clientIpAddress);
+                    Client dbClient = await context.Clients.FirstAsync(c => c.Ip == clientIpAddress);
                     SensorTimer = dbClient.SensorTimer;
                 }
 
@@ -139,7 +138,7 @@ namespace CPULogServer.Services.ServerService
             }
         }
 
-        private async Task StoreClientData(ClientModel client)
+        private async Task StoreClientData(Client client)
         {
             using (var context = new DataContext(new DbContextOptions<DataContext>()))
             {
@@ -167,10 +166,10 @@ namespace CPULogServer.Services.ServerService
                 {
                     using (var context = new DataContext(new DbContextOptions<DataContext>()))
                     {
-                        List<CPUDataModel> cpuData = JsonConvert.DeserializeObject<List<CPUDataModel>>(jsonData);
+                        List<CPUData> cpuData = JsonConvert.DeserializeObject<List<CPUData>>(jsonData);
                         foreach (var cpu in cpuData)
                         {
-                            ClientModel client = await context.Clients.FirstAsync(c => c.Ip == ip);
+                            Client client = await context.Clients.FirstAsync(c => c.Ip == ip);
                             cpu.ClientModel = client;
                             cpu.Ip = client.Ip;
                             await StoreCPUData(cpu, context);
@@ -186,7 +185,7 @@ namespace CPULogServer.Services.ServerService
             else _logger.LogInformation($"Recived data is null");
         }
 
-        private async Task StoreCPUData(CPUDataModel data, DataContext context)
+        private async Task StoreCPUData(CPUData data, DataContext context)
         {
             await context.CPUData.AddAsync(data);
             await context.SaveChangesAsync();

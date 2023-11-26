@@ -20,36 +20,36 @@ namespace CPULogServer.Services.CPUDataService
             _context = context;
         }
 
-        public async Task Store(CPUDataModel cpuData)
+        public async Task Store(CPUData cpuData)
         {
             await _context.CPUData.AddAsync(cpuData);
             await _context.SaveChangesAsync();
         }
-        public async Task<List<CPUDataModel>> GetByClient(int id)
+        public async Task<List<CPUData>> GetByClient(int id)
         {
-            List<CPUDataModel> result = await _context.CPUData.Where(c => c.ClientModel.Id==id).ToListAsync<CPUDataModel>();
+            List<CPUData> result = await _context.CPUData.Where(c => c.ClientModel.Id==id).ToListAsync<CPUData>();
             return result;
         }
 
-        public async Task<CPUDataModel> Get(int id)
+        public async Task<CPUData> Get(int id)
         {
-            CPUDataModel result = await _context.CPUData.SingleOrDefaultAsync<CPUDataModel>(c => c.Id == id);
+            CPUData result = await _context.CPUData.SingleOrDefaultAsync<CPUData>(c => c.Id == id);
             return result;
         }
-        public async Task<List<CPUDataModel>> Get()
+        public async Task<List<CPUData>> Get()
         {
-            List<CPUDataModel> result = await _context.CPUData.ToListAsync<CPUDataModel>();
+            List<CPUData> result = await _context.CPUData.ToListAsync<CPUData>();
             return result;
         }
 
-        public async Task Update(int id, CPUDataModel cpuData)
+        public async Task Update(int id, CPUData cpuData)
         {
-            CPUDataModel result = await _context.CPUData.SingleOrDefaultAsync<CPUDataModel>(c => c.Id == id);
+            CPUData result = await _context.CPUData.SingleOrDefaultAsync<CPUData>(c => c.Id == id);
             _context.Entry(result).CurrentValues.SetValues(cpuData);
         }
         public async Task Delete(int id)
         {
-            CPUDataModel result = await _context.CPUData.SingleOrDefaultAsync<CPUDataModel>(c => c.Id == id);
+            CPUData result = await _context.CPUData.SingleOrDefaultAsync<CPUData>(c => c.Id == id);
             _context.Entry(result).State = EntityState.Detached;
         }
     }

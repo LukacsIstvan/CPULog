@@ -1,5 +1,6 @@
 ﻿using CPULogServer.Models;
 using CPULogServer.Services.CPUDataService;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
 using System.Threading.Tasks;
@@ -34,7 +35,7 @@ namespace CPULogServer.Controllers
             return Ok(_cpuDataService.GetByClient(id).Result);
         }
         [HttpPost]
-        public async Task<ActionResult> Store(CPUDataModel cpuData)
+        public async Task<ActionResult> Store(CPUData cpuData)
         {
             return Ok(_cpuDataService.Store(cpuData));
         }
